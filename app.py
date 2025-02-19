@@ -75,11 +75,9 @@
 #         mime=f"image/{download_format.lower()}",
 #     )
 
-
 import streamlit as st
 import numpy as np
-import cv2
-from PIL import Image
+from PIL import Image, ImageFilter, ImageOps
 import io
 
 # Streamlit App
@@ -133,9 +131,6 @@ if uploaded_file is not None:
     max_size = (400, 400)
     img.thumbnail(max_size)
     
-    # Convert image to OpenCV format (BGR)
-    img_array = np.array(img)
-    
     st.image(img, caption="📸 Uploaded Image (Resized)", use_column_width=True)
 
     # 📌 Image Processing Filters
@@ -143,20 +138,19 @@ if uploaded_file is not None:
     filter_option = st.selectbox("Choose a filter", ["Original", "Grayscale", "Blur", "Edge Detection"])
 
     if filter_option == "Grayscale":
-        processed_img = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+        processed_img = ImageOps.grayscale(img)
         st.image(processed_img, caption="🖤 Grayscale Image", use_column_width=True)
-        final_image = Image.fromarray(processed_img).convert("L")  # Convert to grayscale PIL Image
+        final_image = processed_img
 
     elif filter_option == "Blur":
-        processed_img = cv2.GaussianBlur(img_array, (15, 15), 0)
+        processed_img = img.filter(ImageFilter.GaussianBlur(radius=5))
         st.image(processed_img, caption="🌫️ Blurred Image", use_column_width=True)
-        final_image = Image.fromarray(processed_img)
+        final_image = processed_img
 
     elif filter_option == "Edge Detection":
-        gray_img = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
-        processed_img = cv2.Canny(gray_img, 100, 200)
+        processed_img = img.filter(ImageFilter.FIND_EDGES)
         st.image(processed_img, caption="⚡ Edge Detection Image", use_column_width=True)
-        final_image = Image.fromarray(processed_img).convert("L")  # Convert to grayscale PIL Image
+        final_image = processed_img
 
     else:
         st.image(img, caption="📸 Original Image", use_column_width=True)
@@ -184,8 +178,9 @@ st.markdown(
     """
     <div class="footer">
         Created by Nida | 
-        <a href="https://www.linkedin.com/in/nida-khurram/" target="_blank" style="color: white;">LinkedIn</a>
+        <a href="https://www.linkedin.com/in/nida-khurram/"  target="_blank" style="color: white;">LinkedIn</a>
     </div>
     """,
     unsafe_allow_html=True
 )
+
